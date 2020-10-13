@@ -12,22 +12,26 @@ from discord import FFmpegPCMAudio
 from os import system
 import sys
 
+TOKEN = #hidden for privacy reasons. Use discord developers hub
 
-
-TOKEN = // Find it on discord.gg hub
-
-client = commands.Bot(command_prefix = '.')
-status = cycle(['Minecraft','Roblox','League of Legends','Brawlhalla','Red Dead Redemption 2','Grand Theft Auto V','STAR WARS: BATTLEFRONT 2','Monster Hunter: World','Minecraft Pocket Edition','Skyrim Special Edition', 'Fallout 4', "Garry's Mod","Counter Strike: GLobal Offensive",])
+client = commands.Bot(command_prefix='.')
+status = cycle(['Minecraft', 'Roblox', 'League of Legends', 'Brawlhalla', 'Red Dead Redemption 2', 'Grand Theft Auto V',
+                'STAR WARS: BATTLEFRONT 2', 'Monster Hunter: World', 'Minecraft Pocket Edition',
+                'Skyrim Special Edition', 'Fallout 4', "Garry's Mod", "Counter Strike: Global Offensive",
+                'Among Us', 'Genshin Impact', 'Valorant'])
 keyboard = Controller()
 client.remove_command('help')
 players = {}
 
-@client.event
+
+@client.event  # Our Logs that keep track of comments
 async def on_message(message):
     author = message.author
     content = message.content
     print('{}: {}'.format(author, content))
     await client.process_commands(message)
+
+
 @client.event
 async def on_message_delete(message):
     author = message.author
@@ -36,38 +40,67 @@ async def on_message_delete(message):
     await channel.send('{}: {}'.format(author, content))
     await channel.send(f'You cannot erase history, {author}'.format(author))
     await client.process_commands(message)
+
+@client.command(pass_context = True)
+async def pog(ctx):
+    await ctx.send("Pog!")
+
 @client.event
-async def on_ready():
+async def on_ready():  # Should print bot is ready if its successful
     print("Bot is Ready")
     change_status.start()
-    #await client.change_presence(status=discord.Status.idle, activity=discord.Game('Python'))
-@client.event
+    # await client.change_presence(status=discord.Status.idle, activity=discord.Game('Python'))
+
+
+@client.event  # Will print out the member's name of the server
 async def on_member_join(member):
     print(f'{member} has joined the server!')
+
+
 @client.event
 async def on_member_remove(member):
     print(f'{member} has left the server!')
-@tasks.loop(seconds = 10)
+
+
+@tasks.loop(seconds=10)
 async def change_status():
     await client.change_presence(activity=discord.Game(next(status)))
+
+
 ##@client.event
 ##async def on_error(ctx):
 ##    await ctx.send("Unknown Command")
 
-@client.command()
+@client.command()  # returns the ping latency
 async def ping(ctx):
-    await ctx.send(f'pong! {round(client.latency*1000)}ms')
+    await ctx.send(f'pong! {round(client.latency * 1000)}ms')
 
-@client.command(aliases = ["8ball"])
+@client.command()
+async def rps(ctx, *, playerChoice):
+    gameAnnounce = "none"
+    weapon = ['rock', 'paper', 'scissors']
+    if playerChoice == 'rock' and weapon == 'scissors':
+        gameAnnounce = "You Win!"
+    if playerChoice == 'rock' and weapon == 'rock':
+        gameAnnounce = "Tie!"
+    if playerChoice == 'rock' and weapon == 'paper':
+        gameAnnounce = "You Lost!"
+    await ctx.send(f'You picked {playerChoice} \nBot picked {random.choice(weapon)}')
+    await ctx.send(gameAnnounce)
+
+@client.command(aliases=["8ball"])
 async def _8ball(ctx, *, questions):
-    responses = ["Yes", "No", "I don't know about that one", "Certainly", "Definitley", "I doubt so", "Improbable", "Most Likely"]
+    responses = ["Yes", "No", "I don't know about that one", "Certainly", "Definitley", "I doubt so", "Improbable",
+                 "Most Likely"]
     await ctx.send(f'Question: {questions} \nAnswer: {random.choice(responses)}')
-@client.command(pass_context = True)
-async def help(ctx):
+
+
+@client.command(pass_context=True)
+async def help(ctx):  # help command
     author = ctx.message.author
 
     embed = discord.Embed(
-        colour = discord.Colour.orange()
+        colour=discord.Colour.orange()
     )
 
     embed.set_author(name='All Commands Currently Available')
@@ -76,17 +109,29 @@ async def help(ctx):
     embed.add_field(name='.8ball', value='Ask me a question after the command for me to answer!', inline=False)
     embed.add_field(name='.join', value='Joins the Voice Channel that you are in', inline=False)
     embed.add_field(name='.leave', value='Leaves the Voice Channel that you are in', inline=False)
-    embed.add_field(name='.play [youtube url]', value='Plays any music you want. No Pause or Resume or Skip features currenty, so type ".leave" to stop the bot before choosing a next song.', inline=False)
+    embed.add_field(name='.play [youtube url]',
+                    value='Plays any music you want. No Pause or Resume or Skip features currenty, so type ".leave" to stop the bot before choosing a next song.',
+                    inline=False)
+    embed.add_field(name='.pause', value='Pauses the currently played music', inline=False)
+    embed.add_field(name='.resume', value='Resumes the paused music', inline=False)
+    embed.add_field(name='.stop', value='Stops the currently played music and leaves the call', inline=False)
+    embed.add_field(name='.pog', value='Poggers!', inline=False)
+    embed.add_field(name='.rps', value='Play a game of Rock, Paper, Scissors with the bot!', inline=False)
     await ctx.send(author, embed=embed)
 
-@client.event
+
+@client.event  # emotes will print out
 async def on_reaction_add(reaction, user):
     channel = reaction.message.channel
     await channel.send('{} has added {} to the message: {}'.format(user.name, reaction.emoji, reaction.message.content))
+
+
 @client.event
 async def on_reaction_remove(reaction, user):
     channel = reaction.message.channel
-    await channel.send('{} has removed {} to the message: {}'.format(user.name, reaction.emoji, reaction.message.content))
+    await channel.send(
+        '{} has removed {} to the message: {}'.format(user.name, reaction.emoji, reaction.message.content))
+
 
 # Music channel stuff
 @client.command()
@@ -94,11 +139,13 @@ async def join(ctx):
     channel = ctx.author.voice.channel
     await channel.connect()
 
+
 @client.command()
 async def leave(ctx):
-  await ctx.voice_client.disconnect()
+    await ctx.voice_client.disconnect()
 
 
+# Must update ffmpeg for this to work
 @client.command(pass_context=True, brief="This will play a song 'play [url]'", aliases=['pl'])
 async def play(ctx, url: str):
     song_there = os.path.isfile("song.mp3")
@@ -128,11 +175,15 @@ async def play(ctx, url: str):
     voice.volume = 100
     voice.is_playing()
 
+
+# Bot commands for music player
+
 @client.command(pass_context=True)
 async def pause(ctx):
     player = get(client.voice_clients, guild=ctx.guild)
     if player.is_playing():
         player.pause()
+
 
 @client.command(pass_context=True)
 async def resume(ctx):
@@ -140,17 +191,17 @@ async def resume(ctx):
     if player.is_paused():
         player.resume()
 
-@client.command(pass_context = True)
+
+@client.command(pass_context=True)
 async def stop(ctx):
     player = get(client.voice_clients, guild=ctx.guild)
     player.stop()
     await ctx.voice_client.disconnect()
 
 
-    
 # C:\ffmpeg\bin\ffmpeg.exe -codecs for the ffmpeg stuff
-    
-#Smash Flash 2 stuff
+
+# Smash Flash 2 testing stuff
 ##@client.command()
 ##async def w(ctx):
 ##    keyboard.press('w')
@@ -212,7 +263,6 @@ async def stop(ctx):
 ##    keyboard.press('o')
 ##    sleep(.5)
 ##    keyboard.release('o')
-
 
 
 client.run(TOKEN)
