@@ -1,4 +1,5 @@
-# python-discord-bot
+# python-discord-bot made by Brian Le
+# courtesy of discord.py
 import discord
 import os
 from discord.ext import commands, tasks
